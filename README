@@ -5,13 +5,11 @@ SYNOPSIS
       use Apache::LogFormat::Compiler;
 
       my $log_handler = Apache::LogFormat::Compiler->new("combined");
-      # my $log_handler = Apache::LogFormat::Compiler->new(
-      #     '%h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-agent}i"'
-      # );
       my $log = $log_handler->log_line(
           $env,
           $res,
           $length,
+          $reqtime,
           $time
       );
 
@@ -52,10 +50,39 @@ METHOD
            %{header-name}o      header-name header
            %{time-format]t      localtime in the specified strftime format
 
-    log_line($env:HashRef,$res:ArrayRef,$length:Integer,$time:Integer):
-    $log:String
-        PSGI-style $env and $res, Content-Length and the time taken to serve
-        request in microseconds.
+    log_line($env:HashRef,$res:ArrayRef,$length:Integer,$reqtime:Integer,$ti
+    me:Integer): $log:String
+        Generates log line.
+
+          $env      PSGI-style $env
+          $res      PSGI-style $res
+          $length   Content-Length
+          $reqtime  the time taken to serve request in microseconds 
+          $time     time the request was received
+
+        Sample psgi
+
+          use Plack::Builder;
+          use Time::HiRes;
+          use Apache::LogFormat::Compiler;
+
+          my $log_handler = Apache::LogFormat::Compiler->new(
+              '%h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-agent}i" %D'
+          );
+          my $compile_log_app = builder {
+              enable sub {
+                  my $app = shift;
+                  sub {
+                      my $env = shift;
+                      my $t0 = [gettimeofday];
+                      my $res = $app->();
+                      my $reqtime = int(Time::HiRes::tv_interval($t0) * 1_000_000);
+                      $env->{psgi.error}->print($log_handler->log_line(
+                          $env,$res,6,$reqtime, $t0->[0]));
+                  }
+              };
+              $app
+          };
 
 AUTHOR
     Masahiro Nagano <kazeburo@gmail.com>
