@@ -22,7 +22,7 @@ no_index:
 provides:
   Apache::LogFormat::Compiler:
     file: lib/Apache/LogFormat/Compiler.pm
-    version: 0.02
+    version: 0.03
 requires:
   POSIX: 0
   Plack: 1.0013
@@ -30,4 +30,4 @@ requires:
   perl: 5.008005
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.02
+version: 0.03

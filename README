@@ -39,6 +39,10 @@ METHOD
            %V    HTTP_HOST or SERVER_NAME from the PSGI environment, or -
            %p    SERVER_PORT from the PSGI environment
            %P    the worker's process id
+           %m    REQUEST_METHOD from the PSGI environment
+           %U    PATH_INFO from the PSGI environment
+           %q    QUERY_STRING from the PSGI environment
+           %H    SERVER_PROTOCOL from the PSGI environment
 
         Some of these format fields are only supported by middleware that
         subclasses "AccessLog".
