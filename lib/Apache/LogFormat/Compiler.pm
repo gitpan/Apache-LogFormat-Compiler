@@ -6,9 +6,8 @@ use 5.008005;
 use Carp;
 use POSIX ();
 use Time::Local qw//;
-use Plack::Util;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 # copy from Plack::Middleware::AccessLog
 our %formats = (
@@ -47,16 +46,36 @@ sub _string {
     _safe($string);
 }
 
+sub header_get {
+    my ($headers, $key) = @_;
+    $key = lc $key;
+    my @headers = @$headers; # copy
+    my $value;
+    while (my($hdr, $val) = splice @headers, 0, 2) {
+        if ( lc $hdr eq $key ) {
+            $value = $val;
+            last;
+        }
+    }
+    return $value;
+}
+
+my $psgi_reserved = { CONTENT_LENGTH => 1, CONTENT_TYPE => 1 };
+
 my $block_handler = sub {
-    my($block, $type) = @_;
+    my($self,$block, $type) = @_;
     my $cb;
     if ($type eq 'i') {
         $block =~ s/-/_/g;
-        $cb =  q!_string($env->{"HTTP_" . uc('!.$block.q!')})!;
+        $block = uc($block);
+        $block = "HTTP_${block}" unless $psgi_reserved->{$block};
+        $cb =  q!_string($env->{'!.$block.q!'})!;
     } elsif ($type eq 'o') {
-        $cb =  q!_string(scalar Plack::Util::headers($res->[1])->get('!.$block.q!'))!;
+        $cb =  q!_string(header_get($res->[1],'!.$block.q!'))!;
     } elsif ($type eq 't') {
         $cb =  q!"[" . _strftime('!.$block.q!', localtime($time)) . "]"!;
+    } elsif (exists $self->{extra_block_handlers}->{$type}) {
+        $cb =  q!_string($extra_block_handlers->{'!.$type.q!'}->('!.$block.q!',$env,$res,$length,$reqtime))!;
     } else {
         Carp::croak("{$block}$type not supported");
         $cb = "-";
@@ -89,8 +108,12 @@ our %char_handler = (
 );
 
 my $char_handler = sub {
+    my $self = shift;
     my $char = shift;
     my $cb = $char_handler{$char};
+    if (!$cb && exists $self->{extra_char_handlers}->{$char}) {
+        $cb = q!_string($extra_char_handlers->{'!.$char.q!'}->($env,$res,$length,$reqtime))!;
+    }
     unless ($cb) {
         Carp::croak "\%$char not supported.";
         return "-";
@@ -105,8 +128,12 @@ sub new {
     my $fmt = shift || "combined";
     $fmt = $formats{$fmt} if exists $formats{$fmt};
 
+    my %opts = @_;
+
     my $self = bless {
-        fmt => $fmt
+        fmt => $fmt,
+        extra_block_handlers => $opts{block_handlers} || {},
+        extra_char_handlers => $opts{char_handlers} || {},
     }, $class; 
     $self->compile();
     return $self;
@@ -118,13 +145,15 @@ sub compile {
     $fmt =~ s/!/\\!/g;
     $fmt =~ s!
         (?:
-             \%\{(.+?)\}([a-z]) |
+             \%\{(.+?)\}([a-zA-Z]) |
              \%(?:[<>])?([a-zA-Z\%])
         )
-    ! $1 ? $block_handler->($1, $2) : $char_handler->($3) !egx;
+    ! $1 ? $block_handler->($self, $1, $2) : $char_handler->($self, $3) !egx;
 
     my @abbr = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
     my $tz = $tzoffset;
+    my $extra_block_handlers = $self->{extra_block_handlers};
+    my $extra_char_handlers = $self->{extra_char_handlers};
     $fmt = q~sub {
         my ($env,$res,$length,$reqtime,$time) = @_;
         $reqtime ||= 0;
@@ -190,7 +219,7 @@ L<Apache's LogFormat templates|http://httpd.apache.org/docs/2.0/mod/mod_log_conf
    %t    [local timestamp, in default format]
    %r    REQUEST_METHOD, REQUEST_URI and SERVER_PROTOCOL from the PSGI environment
    %s    the HTTP status code of the response
-   %b    content length
+   %b    content length of the response
    %T    custom field for handling times in subclasses
    %D    custom field for handling sub-second times in subclasses
    %v    SERVER_NAME from the PSGI environment, or -
@@ -208,7 +237,7 @@ In addition, custom values can be referenced, using C<%{name}>,
 with one of the mandatory modifier flags C<i>, C<o> or C<t>:
 
    %{variable-name}i    HTTP_VARIABLE_NAME value from the PSGI environment
-   %{header-name}o      header-name header
+   %{header-name}o      header-name header in the response
    %{time-format]t      localtime in the specified strftime format
 
 =item log_line($env:HashRef,$res:ArrayRef,$length:Integer,$reqtime:Integer,$time:Integer): $log:String
@@ -246,6 +275,33 @@ Sample psgi
   };
 
 =back
+
+=head1 ADD CUSTOM FORMAT STRING
+
+Apache::LogFormat::Compiler allows to add custom format string
+
+  my $log_handler = Apache::LogFormat::Compiler->new(
+      '%z %{HTTP_X_FORWARDED_FOR|REMOTE_ADDR}Z',
+      char_handlers => +{
+          'z' => sub {
+              my ($env,$req) = @_;
+              return $env->{HTTP_X_FORWARDED_FOR};
+          }
+      },
+      block_handlers => +{
+          'Z' => sub {
+              my ($block,$env,$req) = @_;
+              # block eq 'HTTP_X_FORWARDED_FOR|REMOTE_ADDR'
+              my ($main, $alt) = split('\|', $args);
+              return exists $env->{$main} ? $env->{$main} : $env->{$alt};
+          }
+      },
+  );
+
+Any single letter can be used other than Apache::LogFormat::Compiler used.
+Your sub is called with two or three arguments the content inside the C<{}> 
+from the format (block_handlers only), PSGI environment (C<$env>), 
+and ArrayRef of the response. It should return the string to be logged
 
 =head1 AUTHOR
 

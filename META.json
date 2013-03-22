@@ -21,10 +21,11 @@
    "prereqs" : {
       "build" : {
          "requires" : {
-            "HTTP::Message::PSGI" : "0",
             "HTTP::Request::Common" : "0",
             "Test::More" : "0.98",
-            "Test::Requires" : "0"
+            "Test::Requires" : "0",
+            "Try::Tiny" : "0.12",
+            "URI::Escape" : "1.60"
          }
       },
       "configure" : {
@@ -35,7 +36,6 @@
       "runtime" : {
          "requires" : {
             "POSIX" : "0",
-            "Plack" : "1.0013",
             "Time::Local" : "0",
             "perl" : "5.008005"
          }
@@ -44,7 +44,7 @@
    "provides" : {
       "Apache::LogFormat::Compiler" : {
          "file" : "lib/Apache/LogFormat/Compiler.pm",
-         "version" : "0.03"
+         "version" : "0.04"
       }
    },
    "release_status" : "stable",
@@ -53,5 +53,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "0.03"
+   "version" : "0.04"
 }
