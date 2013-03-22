@@ -11,7 +11,7 @@ build_requires:
 configure_requires:
   Module::Build: 0.38
 dynamic_config: 0
-generated_by: 'Module::Build version 0.4003, CPAN::Meta::Converter version 2.120921'
+generated_by: 'Module::Build version 0.3603'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -23,11 +23,11 @@ no_index:
 provides:
   Apache::LogFormat::Compiler:
     file: lib/Apache/LogFormat/Compiler.pm
-    version: 0.04
+    version: 0.05
 requires:
   POSIX: 0
   Time::Local: 0
   perl: 5.008005
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.04
+version: 0.05

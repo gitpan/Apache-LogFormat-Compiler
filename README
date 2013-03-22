@@ -16,8 +16,6 @@ SYNOPSIS
 DESCRIPTION
     Compile LogFormat to perl-code. For faster generating access_log line.
 
-    THIS IS A DEVELOPMENT RELEASE. API MAY CHANGE WITHOUT NOTICE.
-
 METHOD
     new($fmt:String)
         Takes a format string (or a preset template "combined" or "custom")
