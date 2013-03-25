@@ -1,5 +1,5 @@
 ---
-abstract: 'Compile LogFormat to perl-code'
+abstract: 'Compile a log format string to perl-code'
 author:
   - 'Masahiro Nagano E<lt>kazeburo@gmail.comE<gt>'
 build_requires:
@@ -23,11 +23,11 @@ no_index:
 provides:
   Apache::LogFormat::Compiler:
     file: lib/Apache/LogFormat/Compiler.pm
-    version: 0.05
+    version: 0.10
 requires:
   POSIX: 0
   Time::Local: 0
   perl: 5.008005
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.05
+version: 0.10

@@ -1,5 +1,5 @@
 NAME
-    Apache::LogFormat::Compiler - Compile LogFormat to perl-code
+    Apache::LogFormat::Compiler - Compile a log format string to perl-code
 
 SYNOPSIS
       use Apache::LogFormat::Compiler;
@@ -14,7 +14,8 @@ SYNOPSIS
       );
 
 DESCRIPTION
-    Compile LogFormat to perl-code. For faster generating access_log line.
+    Compile a log format string to perl-code. For faster generating
+    access_log line.
 
 METHOD
     new($fmt:String)
@@ -42,9 +43,6 @@ METHOD
            %q    QUERY_STRING from the PSGI environment
            %H    SERVER_PROTOCOL from the PSGI environment
 
-        Some of these format fields are only supported by middleware that
-        subclasses "AccessLog".
-
         In addition, custom values can be referenced, using "%{name}", with
         one of the mandatory modifier flags "i", "o" or "t":
 
@@ -56,11 +54,11 @@ METHOD
     me:Integer): $log:String
         Generates log line.
 
-          $env      PSGI-style $env
-          $res      PSGI-style $res
+          $env      PSGI env request HashRef
+          $res      PSGI response ArrayRef
           $length   Content-Length
-          $reqtime  the time taken to serve request in microseconds 
-          $time     time the request was received
+          $reqtime  The time taken to serve request in microseconds. optional
+          $time     Time the request was received. optional. If $time is undefined. current timestamp is used.
 
         Sample psgi
 
