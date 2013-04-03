@@ -30,7 +30,7 @@ no_index:
 provides:
   Apache::LogFormat::Compiler:
     file: lib/Apache/LogFormat/Compiler.pm
-    version: 0.11
+    version: 0.12
 requires:
   POSIX: 0
   Time::Local: 0
@@ -39,4 +39,4 @@ resources:
   bugtracker: https://github.com/kazeburo/Apache-LogFormat-Compiler/issues
   homepage: https://github.com/kazeburo/Apache-LogFormat-Compiler
   repository: git://github.com/kazeburo/Apache-LogFormat-Compiler.git
-version: 0.11
+version: 0.12

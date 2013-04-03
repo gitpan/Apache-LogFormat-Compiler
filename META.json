@@ -58,7 +58,7 @@
    "provides" : {
       "Apache::LogFormat::Compiler" : {
          "file" : "lib/Apache/LogFormat/Compiler.pm",
-         "version" : "0.11"
+         "version" : "0.12"
       }
    },
    "release_status" : "stable",
@@ -72,5 +72,5 @@
          "web" : "https://github.com/kazeburo/Apache-LogFormat-Compiler"
       }
    },
-   "version" : "0.11"
+   "version" : "0.12"
 }
