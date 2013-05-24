@@ -13,7 +13,7 @@ configure_requires:
   CPAN::Meta::Prereqs: 0
   Module::Build: 0.38
 dynamic_config: 0
-generated_by: 'Minilla/v0.0.49, CPAN::Meta::Converter version 2.130880'
+generated_by: 'Minilla/v0.4.2, CPAN::Meta::Converter version 2.130880'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -27,10 +27,11 @@ no_index:
     - share
     - eg
     - examples
+    - author
 provides:
   Apache::LogFormat::Compiler:
     file: lib/Apache/LogFormat/Compiler.pm
-    version: 0.12
+    version: 0.13
 requires:
   POSIX: 0
   Time::Local: 0
@@ -39,4 +40,6 @@ resources:
   bugtracker: https://github.com/kazeburo/Apache-LogFormat-Compiler/issues
   homepage: https://github.com/kazeburo/Apache-LogFormat-Compiler
   repository: git://github.com/kazeburo/Apache-LogFormat-Compiler.git
-version: 0.12
+version: 0.13
+x_contributors:
+  - 'Florian Schlichting <fsfs@debian.org>'
