@@ -4,6 +4,7 @@ author:
   - 'Masahiro Nagano <kazeburo@gmail.com>'
 build_requires:
   HTTP::Request::Common: 0
+  Test::MockTime: 0
   Test::More: 0.98
   Test::Requires: 0
   Try::Tiny: 0.12
@@ -13,7 +14,7 @@ configure_requires:
   CPAN::Meta::Prereqs: 0
   Module::Build: 0.38
 dynamic_config: 0
-generated_by: 'Minilla/v0.4.2, CPAN::Meta::Converter version 2.130880'
+generated_by: 'Minilla/v0.11.0, CPAN::Meta::Converter version 2.132830'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -28,10 +29,13 @@ no_index:
     - eg
     - examples
     - author
+    - builder
 provides:
   Apache::LogFormat::Compiler:
     file: lib/Apache/LogFormat/Compiler.pm
-    version: 0.13
+    version: 0.14
+recommends:
+  POSIX::strftime::GNU: 0
 requires:
   POSIX: 0
   Time::Local: 0
@@ -40,6 +44,7 @@ resources:
   bugtracker: https://github.com/kazeburo/Apache-LogFormat-Compiler/issues
   homepage: https://github.com/kazeburo/Apache-LogFormat-Compiler
   repository: git://github.com/kazeburo/Apache-LogFormat-Compiler.git
-version: 0.13
+version: 0.14
 x_contributors:
   - 'Florian Schlichting <fsfs@debian.org>'
+  - 'Piotr Roszatycki <piotr.roszatycki@gmail.com>'

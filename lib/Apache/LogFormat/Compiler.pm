@@ -7,7 +7,7 @@ use Carp;
 use POSIX ();
 use Time::Local qw//;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 # copy from Plack::Middleware::AccessLog
 our %formats = (
@@ -15,20 +15,46 @@ our %formats = (
     combined => '%h %l %u %t "%r" %>s %b "%{Referer}i" "%{User-agent}i"',
 );
 
-my $tzoffset = POSIX::strftime("%z", localtime);
-if ( $tzoffset !~ /^[+-]\d{4}$/ ) {
-    my @t = localtime(time);
-    my $s = Time::Local::timegm(@t) - Time::Local::timelocal(@t);
-    my $min_offset = int($s / 60);
-    $tzoffset = sprintf '%+03d%02u', $min_offset / 60, $min_offset % 60;
+BEGIN {
+    if (eval { require POSIX::strftime::GNU; 1; }) {
+        *_posix_strftime = \&POSIX::strftime::GNU::strftime;
+    } else {
+        *_posix_strftime = \&POSIX::strftime;
+    };
+
+    if (_posix_strftime("%z", localtime) =~ /^[+-]\d{4}$/) {
+        *_has_strftime_z = sub () { !! 1 };
+    } else {
+        *_has_strftime_z = sub () { !! 0 };
+    }
+}
+
+sub _tzoffset {
+    my $self = shift;
+    if ( ! exists $self->{tz_cache} || ! exists $self->{isdst_cache} || $_[8] ne $self->{isdst_cache} ) {
+        $self->{isdst_cache} = $_[8];
+        if ( _has_strftime_z ) {
+            $self->{tz_cache} = _posix_strftime('%z', @_);
+        }
+        else {
+            my $s = Time::Local::timegm(@_) - Time::Local::timelocal(@_);
+            my $min_offset = int($s / 60);
+            $self->{tz_cache} = sprintf '%+03d%02u', $min_offset / 60, $min_offset % 60;
+        }
+    }
+    $self->{tz_cache};
 }
 
 sub _strftime {
+    my $self = shift;
     my ($fmt, @time) = @_;
-    $fmt =~ s/%z/$tzoffset/g if $tzoffset;
+    if (not _has_strftime_z) {
+        my $tz = _tzoffset($self,@time);
+        $fmt =~ s/%z/$tz/g;
+    }
     my $old_locale = POSIX::setlocale(&POSIX::LC_ALL);
     POSIX::setlocale(&POSIX::LC_ALL, 'C');
-    my $out = POSIX::strftime($fmt, @time);
+    my $out = _posix_strftime($fmt, @time);
     POSIX::setlocale(&POSIX::LC_ALL, $old_locale);
     return $out;
 };
@@ -74,7 +100,7 @@ my $block_handler = sub {
     } elsif ($type eq 'o') {
         $cb =  q!_string(header_get($res->[1],'!.$block.q!'))!;
     } elsif ($type eq 't') {
-        $cb =  q!"[" . _strftime('!.$block.q!', localtime($time)) . "]"!;
+        $cb =  q!"[" . _strftime($this,'!.$block.q!', localtime($time)) . "]"!;
     } elsif (exists $self->{extra_block_handlers}->{$type}) {
         $cb =  q!_string($extra_block_handlers->{'!.$type.q!'}->('!.$block.q!',$env,$res,$length,$reqtime))!;
     } else {
@@ -152,13 +178,15 @@ sub compile {
     ! $1 ? $block_handler->($self, $1, $2) : $char_handler->($self, $3) !egx;
 
     my @abbr = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
-    my $tz = $tzoffset;
     my $extra_block_handlers = $self->{extra_block_handlers};
     my $extra_char_handlers = $self->{extra_char_handlers};
+    
+    my @lt = localtime(time);
     $fmt = q~sub {
-        my ($env,$res,$length,$reqtime,$time) = @_;
+        my ($this,$env,$res,$length,$reqtime,$time) = @_;
         $time = time() if ! defined $time;
-        my @lt = localtime($time);;
+        my @lt = localtime($time);
+        my $tz = _tzoffset($this,@lt);
         my $t = sprintf '%02d/%s/%04d:%02d:%02d:%02d %s', $lt[3], $abbr[$lt[4]], $lt[5]+1900, 
           $lt[2], $lt[1], $lt[0], $tz;
         q!~ . $fmt . q~!
@@ -170,7 +198,7 @@ sub compile {
 sub log_line {
     my $self = shift;
     my ($env,$res,$length,$reqtime,$time) = @_;
-    my $log = $self->{log_handler}->($env,$res,$length,$reqtime,$time);
+    my $log = $self->{log_handler}->($self,$env,$res,$length,$reqtime,$time);
     $log . "\n";
 }
 
@@ -298,6 +326,11 @@ Any single letter can be used, other than those already defined by Apache::LogFo
 Your sub is called with two or three arguments: the content inside the C<{}>
 from the format (block_handlers only), the PSGI environment (C<$env>),
 and the ArrayRef of the response. It should return the string to be logged.
+
+=head1 RECOMMENDED MODULE
+
+If L<POSIX::strftime::GNU> is available, Apache::LogFormat::Compiler uses it. 
+It's good for Windows and old Unices have limited strftime's formatting.
 
 =head1 AUTHOR
 
