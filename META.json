@@ -45,7 +45,7 @@
          "requires" : {
             "POSIX" : "0",
             "Time::Local" : "0",
-            "perl" : "5.008005"
+            "perl" : "5.008004"
          },
          "suggests" : {
             "POSIX::strftime::GNU" : "0"
@@ -65,7 +65,7 @@
    "provides" : {
       "Apache::LogFormat::Compiler" : {
          "file" : "lib/Apache/LogFormat/Compiler.pm",
-         "version" : "0.20"
+         "version" : "0.21"
       }
    },
    "release_status" : "stable",
@@ -79,7 +79,7 @@
          "web" : "https://github.com/kazeburo/Apache-LogFormat-Compiler"
       }
    },
-   "version" : "0.20",
+   "version" : "0.21",
    "x_contributors" : [
       "Florian Schlichting <fsfs@debian.org>",
       "Piotr Roszatycki <piotr.roszatycki@gmail.com>"

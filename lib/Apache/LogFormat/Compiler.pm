@@ -2,12 +2,12 @@ package Apache::LogFormat::Compiler;
 
 use strict;
 use warnings;
-use 5.008005;
+use 5.008004;
 use Carp;
 use POSIX ();
 use Time::Local qw//;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 # copy from Plack::Middleware::AccessLog
 our %formats = (
