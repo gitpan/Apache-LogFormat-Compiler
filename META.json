@@ -65,7 +65,7 @@
    "provides" : {
       "Apache::LogFormat::Compiler" : {
          "file" : "lib/Apache/LogFormat/Compiler.pm",
-         "version" : "0.21"
+         "version" : "0.22"
       }
    },
    "release_status" : "stable",
@@ -79,7 +79,7 @@
          "web" : "https://github.com/kazeburo/Apache-LogFormat-Compiler"
       }
    },
-   "version" : "0.21",
+   "version" : "0.22",
    "x_contributors" : [
       "Florian Schlichting <fsfs@debian.org>",
       "Piotr Roszatycki <piotr.roszatycki@gmail.com>"
