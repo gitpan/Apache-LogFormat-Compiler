@@ -4,10 +4,11 @@ use strict;
 use warnings;
 use 5.008004;
 use Carp;
+use Config;
 use POSIX ();
 use Time::Local qw//;
 
-our $VERSION = '0.22';
+our $VERSION = '0.23';
 
 # copy from Plack::Middleware::AccessLog
 our %formats = (
@@ -52,10 +53,15 @@ sub _strftime {
         my $tz = _tzoffset($self,@time);
         $fmt =~ s/%z/$tz/g;
     }
-    my $old_locale = POSIX::setlocale(&POSIX::LC_ALL);
-    POSIX::setlocale(&POSIX::LC_ALL, 'C');
+    my $old_locale;
+    if ( $Config{d_setlocale} ) {
+        $old_locale = POSIX::setlocale(&POSIX::LC_ALL);
+        POSIX::setlocale(&POSIX::LC_ALL, 'C');
+    }
     my $out = _posix_strftime($fmt, @time);
-    POSIX::setlocale(&POSIX::LC_ALL, $old_locale);
+    if ( $Config{d_setlocale} ) {
+        POSIX::setlocale(&POSIX::LC_ALL, $old_locale);
+    }
     return $out;
 };
 
