@@ -13,7 +13,7 @@ use constant {
     TIME => 4,
 };
 
-our $VERSION = '0.24';
+our $VERSION = '0.30';
 
 # copy from Plack::Middleware::AccessLog
 our %formats = (
@@ -265,6 +265,10 @@ Sample psgi
   };
 
 =back
+
+=head1 ABOUT POSIX::strftime::Compiler
+
+This module uses L<POSIX::strftime::Compiler> for generate datetime string. POSIX::strftime::Compiler provides GNU C library compatible strftime(3). But this module will not affected by the system locale. This feature is useful when you want to write loggers, servers and portable applications.
 
 =head1 ADD CUSTOM FORMAT STRING
 

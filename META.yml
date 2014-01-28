@@ -33,7 +33,7 @@ no_index:
 provides:
   Apache::LogFormat::Compiler:
     file: lib/Apache/LogFormat/Compiler.pm
-    version: 0.24
+    version: 0.30
 requires:
   POSIX: 0
   POSIX::strftime::Compiler: 0.30
@@ -43,7 +43,7 @@ resources:
   bugtracker: https://github.com/kazeburo/Apache-LogFormat-Compiler/issues
   homepage: https://github.com/kazeburo/Apache-LogFormat-Compiler
   repository: git://github.com/kazeburo/Apache-LogFormat-Compiler.git
-version: 0.24
+version: 0.30
 x_contributors:
   - 'Florian Schlichting <fsfs@debian.org>'
   - 'Piotr Roszatycki <piotr.roszatycki@gmail.com>'
